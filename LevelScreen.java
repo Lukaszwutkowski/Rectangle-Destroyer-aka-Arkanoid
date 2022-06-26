@@ -4,6 +4,7 @@ public class LevelScreen extends BaseScreen
 {
 
     Paddle paddle;
+    Ball ball;
 
     public void initialize() 
     {
@@ -33,6 +34,8 @@ public class LevelScreen extends BaseScreen
                 new Brick(x, y, mainStage);
             }
         }
+
+        ball = new Ball(0, 0, mainStage);
     }
 
     public void update(float dt)
@@ -40,6 +43,18 @@ public class LevelScreen extends BaseScreen
         float mouseX = Gdx.input.getX();
         paddle.setX(mouseX - paddle.getWidth()/2);
         paddle.boundToWorld();
+
+        if (ball.isPaused()){
+            ball.setX(paddle.getX() + paddle.getWidth()/2 - ball.getWidth()/2);
+            ball.setY(paddle.getY() + paddle.getHeight()/2 + ball.getHeight()/2);
+        }
        
+    }
+
+    public boolean touchDown(int screenX, int screenY, int pointer, int button){
+        if (ball.isPaused()){
+            ball.setPaused((false));
+        }
+        return  false;
     }
 }
