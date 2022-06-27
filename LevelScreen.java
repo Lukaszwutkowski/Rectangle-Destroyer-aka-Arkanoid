@@ -1,14 +1,35 @@
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 public class LevelScreen extends BaseScreen
 {
 
     Paddle paddle;
     Ball ball;
+    int score;
+    int balls;
+    Label scoreLabel;
+    Label ballsLabel;
+    Label messageLabel;
 
     public void initialize() 
     {
+        score= 0;
+        balls = 3;
+        scoreLabel = new Label("Score: " + score, BaseGame.labelStyle);
+        ballsLabel = new Label("Balls: " + balls, BaseGame.labelStyle);
+        messageLabel = new Label("click to start", BaseGame.labelStyle);
+        messageLabel.setColor(Color.CYAN);
+
+        uiTable.pad(5);
+        uiTable.add(scoreLabel);
+        uiTable.add().expandX();
+        uiTable.add(ballsLabel);
+        uiTable.row();
+        uiTable.add(messageLabel).colspan(3).expandY();
+
         BaseActor background = new BaseActor(0, 0, mainStage);
         background.loadTexture("assets/space.png");
         BaseActor.setWorldBounds(background);
@@ -60,6 +81,8 @@ public class LevelScreen extends BaseScreen
             if (ball.overlaps(brick)){
                 ball.bounceOff(brick);
                 brick.remove();
+                score += 100;
+                scoreLabel.setText("Score: " + score);
             }
         }
 
@@ -69,12 +92,38 @@ public class LevelScreen extends BaseScreen
             float bounceAngle = MathUtils.lerp(150, 30, paddlePercentHit);
             ball.setMotionAngle(bounceAngle);
         }
+
+        if (BaseActor.count(mainStage, "Brick") == 0){
+            messageLabel.setText("You Win!");
+            messageLabel.setColor(Color.LIME);
+            messageLabel.setVisible(true);
+        }
+
+        if (ball.getY() < -50 && BaseActor.count(mainStage, "Brick") > 0){
+            ball.remove();
+
+            if (balls > 0){
+                balls -= 1;
+                ballsLabel.setText("Balls: " + balls);
+                ball = new Ball(0, 0, mainStage);
+
+                messageLabel.setText("Click to start");
+                messageLabel.setColor(Color.CYAN);
+                messageLabel.setVisible(true);
+            }
+            else {
+                messageLabel.setText("Game Over");
+                messageLabel.setColor(Color.RED);
+                messageLabel.setVisible(true);
+            }
+        }
        
     }
 
     public boolean touchDown(int screenX, int screenY, int pointer, int button){
         if (ball.isPaused()){
             ball.setPaused((false));
+            messageLabel.setVisible(false);
         }
         return  false;
     }
