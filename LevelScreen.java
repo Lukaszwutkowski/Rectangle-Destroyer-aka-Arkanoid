@@ -83,6 +83,12 @@ public class LevelScreen extends BaseScreen
                 brick.remove();
                 score += 100;
                 scoreLabel.setText("Score: " + score);
+
+                float spawnProbability = 20;
+                if (MathUtils.random(0, 100) < spawnProbability){
+                    Item i = new Item(0, 0, mainStage);
+                    i.centerAtActor(brick);
+                }
             }
         }
 
@@ -115,6 +121,28 @@ public class LevelScreen extends BaseScreen
                 messageLabel.setText("Game Over");
                 messageLabel.setColor(Color.RED);
                 messageLabel.setVisible(true);
+            }
+        }
+
+        for (BaseActor item : BaseActor.getList(mainStage, "Item")){
+            if (paddle.overlaps(item)){
+                Item realItem = (Item)item;
+
+                if (realItem.getType() == Item.Type.PADDLE_EXPAND){
+                    paddle.setWidth(paddle.getWidth() * 1.25f);
+                }
+                else if (realItem.getType() == Item.Type.PADDLE_SHRINK){
+                    paddle.setWidth(paddle.getWidth() * 0.80f);
+                }
+                else if (realItem.getType() == Item.Type.BALL_SPEED_UP){
+                    ball.setSpeed(ball.getSpeed() * 1.50f);
+                }
+                else if (realItem.getType() == Item.Type.BALL_SPEED_DOWN){
+                    ball.setSpeed(ball.getSpeed() * 0.90f);
+                }
+
+                paddle.setBoundaryRectangle();
+                item.remove();
             }
         }
        
