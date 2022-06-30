@@ -1,4 +1,6 @@
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -13,6 +15,12 @@ public class LevelScreen extends BaseScreen
     Label scoreLabel;
     Label ballsLabel;
     Label messageLabel;
+    Sound bounceSound;
+    Sound brickBumpSound;
+    Sound wallBumpSound;
+    Sound itemAppearSound;
+    Sound itemCollectSound;
+    Music backgroundMusic;
 
     public void initialize() 
     {
@@ -58,6 +66,17 @@ public class LevelScreen extends BaseScreen
         }
 
         ball = new Ball(0, 0, mainStage);
+
+        bounceSound = Gdx.audio.newSound(Gdx.files.internal("assets/boing.wav"));
+        brickBumpSound = Gdx.audio.newSound(Gdx.files.internal("assets/bump.wav"));
+        wallBumpSound = Gdx.audio.newSound(Gdx.files.internal("assets/bump-low.wav"));
+        itemAppearSound = Gdx.audio.newSound(Gdx.files.internal("assets/swoosh.wav"));
+        itemCollectSound = Gdx.audio.newSound(Gdx.files.internal("assets/pop.wav"));
+
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("assets/Rollin-at-5.mp3"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(0.50f);
+        backgroundMusic.play();
     }
 
     public void update(float dt)
@@ -74,12 +93,14 @@ public class LevelScreen extends BaseScreen
         for (BaseActor wall : BaseActor.getList(mainStage, "Wall")){
             if (ball.overlaps(wall)){
                 ball.bounceOff(wall);
+                wallBumpSound.play();
             }
         }
 
         for (BaseActor brick : BaseActor.getList(mainStage, "Brick")){
             if (ball.overlaps(brick)){
                 ball.bounceOff(brick);
+                brickBumpSound.play();
                 brick.remove();
                 score += 100;
                 scoreLabel.setText("Score: " + score);
@@ -97,6 +118,7 @@ public class LevelScreen extends BaseScreen
             float paddlePercentHit = (ballCenterX - paddle.getX()) / paddle.getWidth();
             float bounceAngle = MathUtils.lerp(150, 30, paddlePercentHit);
             ball.setMotionAngle(bounceAngle);
+            bounceSound.play();
         }
 
         if (BaseActor.count(mainStage, "Brick") == 0){
@@ -127,6 +149,7 @@ public class LevelScreen extends BaseScreen
         for (BaseActor item : BaseActor.getList(mainStage, "Item")){
             if (paddle.overlaps(item)){
                 Item realItem = (Item)item;
+                itemAppearSound.play();
 
                 if (realItem.getType() == Item.Type.PADDLE_EXPAND){
                     paddle.setWidth(paddle.getWidth() * 1.25f);
@@ -143,6 +166,7 @@ public class LevelScreen extends BaseScreen
 
                 paddle.setBoundaryRectangle();
                 item.remove();
+                itemCollectSound.play();
             }
         }
        
